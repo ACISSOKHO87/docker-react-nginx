@@ -1,0 +1,43 @@
+name: myapp
+
+services:
+    client:
+        build: 
+            context: ./client
+            dockerfile: Dockerfile.dev
+        volumes:
+            -   type: bind
+                source: ./client
+                target: /home/app
+            -   type: volume
+                target: /home/app/node_modules
+        ports:
+            -   3000:3000
+    api:
+        build: 
+            context: ./api
+            dockerfile: Dockerfile.dev
+        volumes:
+            -   type:   bind
+                source: ./api/src 
+                target: /app/src
+        ports:
+            - 3001:80 
+    db:
+        image: mongo
+        volumes:
+            -   type: volume
+                source: mydbtest
+                target: /data/db
+    reverse-proxy:
+        build:
+            context: ./reverse-proxy
+            dockerfile: Dockerfile.dev
+        ports:
+            -   80:80
+        depends_on:
+            -   api
+            -   db
+volumes:
+    mydbtest:
+        external: true
